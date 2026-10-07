@@ -123,6 +123,68 @@ Module to query APIVoid with some domain attributes.
 
 -----
 
+#### [APIFreaks](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apifreaks.py)
+
+<img src=logos/apifreaks.png height=60>
+
+An expansion module for [APIFreaks](https://apifreaks.com/) that provides an
+enriched analysis of a domain, hostname, IP address, ASN or email address,
+including WHOIS, DNS, subdomains and domain-availability information.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apifreaks.py)]
+
+- **features**:
+
+> The module takes a domain, hostname, IP address, ASN or email attribute as
+> input and queries the relevant APIFreaks WHOIS, Domain and DNS endpoints with
+> it. The results of the queries are then parsed to extract as much information
+> as possible and mapped into compatible MISP attributes. Each lookup family can
+> be toggled on or off from the module configuration to control API credit
+> usage.
+
+- **config**:
+
+> - apikey
+> - do_whois
+> - do_dns
+> - do_subdomains
+> - do_availability
+> - do_history
+> - do_reverse_dns
+
+- **input**:
+
+> A domain, hostname, IP address (ip-src/ip-dst), ASN (AS) or email
+> (email-src/email-dst/target-email/whois-registrant-email) attribute.
+
+- **output**:
+
+> MISP attributes resulting from the queries on the APIFreaks API, included in
+> the following list:
+> - domain
+> - hostname
+> - ip-src
+> - ip-dst
+> - AS
+> - whois-registrant-email
+> - whois-registrant-phone
+> - whois-registrant-name
+> - whois-registrar
+> - whois-creation-date
+> - dns-soa-email
+> - email-src
+> - datetime
+> - text
+
+- **references**:
+
+> - <https://apifreaks.com/>
+> - <https://apifreaks.com/api>
+
+- **requirements**:
+
+> An access to the APIFreaks API (apikey)
+---
+
 #### [AssemblyLine Query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_query.py)
 
 <img src=../logos/assemblyline.png height=60>
@@ -1390,6 +1452,35 @@ Module to query IPRep data for IP addresses.
 
 -----
 
+#### [isMalicious Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ismalicious.py)
+
+<img src=../logos/ismalicious.png height=60>
+
+Query isMalicious for IP, domain, hostname, and URL reputation.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ismalicious.py)]
+
+- **features**:
+>The module takes an IP, domain, hostname or URL attribute (the domain side of a domain|ip) and queries GET /check on the isMalicious API. It returns a text summary with the malicious flag, risk score, categories and source count. Only threat listings are counted: listings that describe what an indicator is (cloud and CDN ranges, Tor exits, DoH resolvers, ad lists, allowlists) are left out of the categories and of the source count. Hover and expansion share the same handler. The queried indicator is sent over TLS; nothing else leaves the MISP instance besides the configured API key.
+
+- **config**:
+> - api_key
+> - api_url
+
+- **input**:
+>An IP address, domain, hostname or URL.
+
+- **output**:
+>Text attributes with the isMalicious reputation summary.
+
+- **references**:
+> - https://ismalicious.com/integrations/misp
+> - https://ismalicious.com/api-docs
+
+- **requirements**:
+>An isMalicious API key (free accounts are available): the X-API-KEY value, Base64 of apiKey:apiSecret, shown under API credentials on the isMalicious account page.
+
+-----
+
 #### [Ninja Template Rendering](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/jinja_template_rendering.py)
 
 Render the template with the data passed
@@ -2118,6 +2209,260 @@ Module to check an IPv4 address against known RBLs.
 
 -----
 
+#### [RST Cloud Cobalt Strike Beacon](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_cs_beacon.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Scan a target IP[:port] for a Cobalt Strike beacon configuration via RST Scan API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_cs_beacon.py)]
+
+- **features**:
+>Probes the target for Cobalt Strike beacon configurations via RST Scan GET /scan/cs-beacon. On a hit, returns file MISP object(s) with pivotable SHA-256 hashes tagged to the Cobalt Strike galaxy.
+
+- **config**:
+> - api_key
+> - base_url
+> - port
+> - timeout
+
+- **input**:
+>IP, URL, domain, or hostname attribute (optional port via config).
+
+- **output**:
+>file MISP object(s) with beacon hashes and Cobalt Strike galaxy tag.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
+#### [RST Cloud Favicon](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_favicon.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Fetch a target's favicon (image + all hashes for Shodan/Netlas/Censys pivoting) via RST Scan API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_favicon.py)]
+
+- **features**:
+>Retrieves the favicon image and cryptographic hashes via RST Scan GET /scan/favicon. Returns a file MISP object with MD5/SHA-1/SHA-256 and a standalone Murmur3 favicon-hash attribute for Shodan/FOFA-style pivoting.
+
+- **config**:
+> - api_key
+> - base_url
+> - timeout
+
+- **input**:
+>URL, domain, hostname, or IP attribute.
+
+- **output**:
+>file MISP object, favicon-hash attribute, and resolved favicon URL.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
+#### [RST Cloud HTML Fetcher](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_html.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Fetch rendered HTML body or extracted JavaScript for a URL/IP target via RST Scan API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_html.py)]
+
+- **features**:
+>Fetches the rendered HTML body or extracted JavaScript from the target via RST Scan. Returns a file MISP object with the page attached and pivotable content hashes. Configurable mode: body (default) or js.
+
+- **config**:
+> - api_key
+> - base_url
+> - mode
+> - port
+> - timeout
+
+- **input**:
+>URL, domain, hostname, or IP attribute (optional port via config).
+
+- **output**:
+>file MISP object (page.html or page.js) with hashes and HTTP metadata.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
+#### [RST Cloud IoC Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_ioc.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Enrich indicators with RST Cloud threat intelligence.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_ioc.py)]
+
+- **features**:
+>Queries RST Cloud GET /ioc for threat scores, attribution, geo/ASN, DNS, WHOIS, TTPs, CVEs, and related indicators. Returns a structured rst-ioc MISP object with galaxy tags and optional pivotable related hashes/IPs. When misp_url and misp_key are configured, also writes score/threat tags onto the enriched attribute via the MISP API.
+
+- **config**:
+> - api_key
+> - base_url
+> - misp_url
+> - misp_key
+> - misp_verifycert
+
+- **input**:
+>IP, domain, hostname, URL, or hash attribute (incl. host|port composites).
+
+- **output**:
+>rst-ioc MISP object, galaxy/score tags, and optional related attributes.
+
+- **references**:
+>https://api.rstcloud.net/
+>https://github.com/MISP/misp-objects/pull/526
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+> - rst-ioc object template installed on MISP ([misp-objects #526](https://github.com/MISP/misp-objects/pull/526))
+
+-----
+
+#### [RST Cloud Noise Control](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_noise_control.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Check whether a value is known-good / noise via RST Noise Control.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_noise_control.py)]
+
+- **features**:
+>Queries RST Cloud GET /benign/lookup for benign/noisy verdicts. Returns an rst-noise MISP object with false-positive risk tags. When misp_url and misp_key are configured, also annotates the source attribute in place (tags, comment, to_ids, false-positive sightings).
+
+- **config**:
+> - api_key
+> - base_url
+> - misp_url
+> - misp_key
+> - misp_verifycert
+
+- **input**:
+>IP, domain, hostname, URL, or hash attribute (incl. host|port composites).
+
+- **output**:
+>rst-noise MISP object with verdict, category, and risk/noise tags.
+
+- **references**:
+>https://api.rstcloud.net/
+>https://github.com/MISP/misp-taxonomies/pull/335
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+> - rst-noise object template on MISP ([misp-objects #526](https://github.com/MISP/misp-objects/pull/526))
+> - rstcloud taxonomy on MISP ([misp-taxonomies #335](https://github.com/MISP/misp-taxonomies/pull/335))
+
+-----
+
+#### [RST Cloud Screenshot](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_screenshot.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Capture a page screenshot of a URL/IP target via RST Scan API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_screenshot.py)]
+
+- **features**:
+>Renders the target page and returns a PNG screenshot as an image MISP object (inline in MISP). Configurable frame: first, full (default), or last.
+
+- **config**:
+> - api_key
+> - base_url
+> - frame
+> - port
+> - timeout
+
+- **input**:
+>URL, domain, hostname, or IP attribute (optional port via config).
+
+- **output**:
+>image MISP object with PNG attachment linked to the enriched attribute.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
+#### [RST Cloud SSL Certificate](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_ssl.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Fetch the SSL certificate for an IP[:port] as an x509 object via RST Scan API.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_ssl.py)]
+
+- **features**:
+>Connects to the target service and retrieves the TLS certificate via RST Scan GET /scan/ssl/certificate. Returns an x509 MISP object with pivotable fingerprints (SHA-1/256/MD5), subject, issuer, and validity dates.
+
+- **config**:
+> - api_key
+> - base_url
+> - port
+> - timeout
+
+- **input**:
+>IP, hostname, or domain attribute (optional port via config or composite).
+
+- **output**:
+>x509 MISP object referencing the enriched attribute.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
+#### [RST Cloud Whois](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_whois.py)
+
+<img src=../logos/rstcloud.png height=60>
+
+Retrieve parsed WHOIS information for a domain via RST Cloud.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/rst_whois.py)]
+
+- **features**:
+>Queries RST Cloud GET /whois for parsed domain registration data. Returns a standard whois MISP object (registrar, registrant, dates, nameservers) linked back to the enriched attribute.
+
+- **config**:
+> - api_key
+> - base_url
+
+- **input**:
+>Domain or hostname attribute.
+
+- **output**:
+>whois MISP object with registration and nameserver fields.
+
+- **references**:
+>https://api.rstcloud.net/
+
+- **requirements**:
+> - rstapi>=1.2.0 (PyPI)
+> - An RST Cloud API key
+
+-----
+
 #### [Recorded Future Enrich](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/recordedfuture.py)
 
 <img src=../logos/recordedfuture.png height=60>
@@ -2146,6 +2491,35 @@ Module to enrich attributes with threat intelligence from Recorded Future.
 
 - **requirements**:
 >A Recorded Future API token.
+
+-----
+
+#### [ReversingLabs Enrichment](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs_spectra_analyze.py)
+
+<img src=../logos/reversinglabs.png height=60>
+
+Module to enrich file hashes, domains, IPs and URLs with ReversingLabs Spectra Analyze threat intelligence.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/reversinglabs_spectra_analyze.py)]
+
+- **features**:
+>This module enriches MISP attributes with threat intelligence from ReversingLabs Spectra Analyze. It supports file hashes (MD5, SHA1, SHA256), domains, hostnames, IP addresses, and URLs. The module returns detailed file analysis including classification, threat indicators, and related network infrastructure as MISP objects.
+
+- **config**:
+> - api_url
+> - api_token
+> - verify_ssl
+
+- **input**:
+>A MISP attribute of one of the following types: md5, sha1, sha256, domain, hostname, ip, ip-src, ip-dst, url.
+
+- **output**:
+>MISP objects including file objects, domain-ip mappings, DNS records, URL objects, and IP-port objects with detailed threat intelligence.
+
+- **references**:
+>https://github.com/reversinglabs/reversinglabs-misp
+
+- **requirements**:
+>A ReversingLabs Spectra Analyze API token.
 
 -----
 
@@ -2587,6 +2961,30 @@ Module to get enrich indicators with TruSTAR.
 
 -----
 
+#### [TweetFeed Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/tweetfeed.py)
+
+Look up an IOC in TweetFeed (tweetfeed.live), the free CC0 feed of URLs, domains, IPs and hashes shared by the infosec community on X/Twitter: who reported it and when, the source tweets and hashtags, cross-feed corroboration, AI-generated context and campaign membership.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/tweetfeed.py)]
+
+- **features**:
+>The module takes an IP, domain, hostname, URL, MD5 or SHA-256 attribute and queries the TweetFeed API for it. Matches come back as microblog objects for the source tweets (reporter, hashtags, first/last seen), plus attributes for co-reported IOCs, AI-generated context, domain registration and hosting, IP network metadata, corroboration from other feeds and campaign membership. Everything returned is community reported and unverified: no MISP tag or confidence score is set from it. The live 365-day window is queried first, and IOCs older than that are looked up in TweetFeed's separate archive.
+
+- **input**:
+>An IP address, domain, hostname, URL, MD5 or SHA-256 attribute.
+
+- **output**:
+>microblog objects for the source tweets, domain-ip / text / link attributes with registration, network, corroboration, AI context and campaign data.
+
+- **references**:
+> - https://tweetfeed.live
+> - https://tweetfeed.live/api/
+> - https://tweetfeed.live/hunt/
+
+- **requirements**:
+>No API key required.
+
+-----
+
 #### [URLhaus Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlhaus.py)
 
 <img src=../logos/urlhaus.png height=60>
@@ -2639,6 +3037,39 @@ An expansion module to query urlscan.io.
 
 - **requirements**:
 >An access to the urlscan.io API
+
+-----
+
+#### [Validin Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/validin.py)
+
+<img src=logos/validin.png height=60>
+
+An expansion module to query the Validin historic internet dataset including: DNS, Subdomains, Host Responses, Certificates, and Registration.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/validin.py)]
+
+- **features**:
+>Queries Validin's datasets for: DNS history, subdomains, host responses, certificates and registration
+>records (enterprise users only) to enrich domains and IPs in MISP.
+>The configured lookback is 14 days for DNS, 21 days for web crawls, and
+>30 days for registration history. To set this up correctly, you need to configure: a Validin api key,
+>a Validin endpoint (e.g. app.validin.com), and a result_limit, which defaults to 100.
+
+- **config**:
+> - endpoint
+> - api_key
+> - result_limit
+
+- **input**:
+>A domain, hostname, ip-src, or ip-dst attribute.
+
+- **output**:
+>MISP attributes mapped from the result of the query on Validin.
+
+- **references**:
+>https://www.validin.com
+
+- **requirements**:
+>An account on the Validin Community or Enterprise platforms, and an API key (found in your profile on the Validin platform).
 
 -----
 
@@ -2961,6 +3392,36 @@ Module to enrich the information by making use of the Vysion API.
 
 -----
 
+#### [Whisper](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whisper.py)
+
+<img src=../logos/whisper.png height=60>
+
+Enrich IPs, domains, and ASNs with threat intelligence and infrastructure context from the Whisper graph.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whisper.py)]
+
+- **features**:
+>The module queries the Whisper graph for the input attribute and returns related infrastructure (DNS, ASN/BGP, WHOIS) and threat intelligence context as MISP attributes and objects.
+
+- **config**:
+> - api_url
+> - api_key
+> - max_tlp
+> - timeout
+
+- **input**:
+>An IP address, domain, hostname or AS MISP attribute.
+
+- **output**:
+>MISP attributes and objects with the related infrastructure and threat intelligence context from the Whisper graph.
+
+- **references**:
+>https://whisper.security
+
+- **requirements**:
+>An access to the Whisper graph API (api_url + api_key)
+
+-----
+
 #### [Whois Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py)
 
 Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
@@ -2991,32 +3452,24 @@ Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 
 <img src=../logos/whoisfreaks.png height=60>
 
-An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
+An expansion module for https://whoisfreaks.com/ that enriches a domain or an IP address. For a domain it queries the WHOIS, DNS and Domain Reputation APIs; for an IP address it queries the IP WHOIS, Geolocation and IP Security APIs. All lookups for a given attribute are executed in parallel.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whoisfreaks.py)]
 
 - **features**:
->The module takes a domain as input and queries the Whoisfreaks API with it.
+>The module takes a domain or an IP address as input.
 >
->Some parsing operations are then processed on the result of the query to extract as much information as possible.
+>For a domain it queries the Whoisfreaks WHOIS (v1.0), DNS (v2.0) and Domain Reputation APIs in parallel. For an IP address it queries the IP WHOIS, Geolocation and IP Security APIs in parallel.
 >
->After this we map the extracted data to MISP attributes.
+>The results are mapped to MISP attributes, objects (geolocation, asn, reputation and security) and tags.
 
 - **config**:
 >apikey
 
 - **input**:
->A domain whose Data is required
+>A domain or an IP address (ip-src, ip-dst or ip).
 
 - **output**:
->MISP attributes resulting from the query on Whoisfreaks API, included in the following list:
->- domain
->- dns-soa-email
->- whois-registrant-email
->- whois-registrant-phone
->- whois-registrant-name
->- whois-registrar
->- whois-creation-date
->- domain
+>MISP attributes, objects and tags resulting from the WhoisFreaks WHOIS, DNS, Domain Reputation, IP WHOIS, Geolocation and IP Security APIs.
 
 - **references**:
 >https://whoisfreaks.com/

@@ -21,6 +21,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [APIVoid](https://misp.github.io/misp-modules/expansion/#apivoid) - Module to query APIVoid with some domain attributes.
 * [AssemblyLine Query](https://misp.github.io/misp-modules/expansion/#assemblyline-query) - A module tu query the AssemblyLine API with a submission ID to get the submission report and parse it.
 * [AssemblyLine Submit](https://misp.github.io/misp-modules/expansion/#assemblyline-submit) - A module to submit samples and URLs to AssemblyLine for advanced analysis, and return the link of the submission.
+* [APIFreaks](https://misp.github.io/misp-modules/expansion/#apifreaks) - An expansion module for https://apifreaks.com/ that will provide WHOIS, DOMAIN and DNS information.
 * [Backscatter.io](https://misp.github.io/misp-modules/expansion/#backscatter.io) - Backscatter.io module to bring mass-scanning observations into MISP.
 * [BTC Scam Check](https://misp.github.io/misp-modules/expansion/#btc-scam-check) - An expansion hover module to query a special dns blacklist to check if a bitcoin address has been abused.
 * [BTC Steroids](https://misp.github.io/misp-modules/expansion/#btc-steroids) - An expansion hover module to get a blockchain balance from a BTC address in MISP.
@@ -63,6 +64,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [IPInfo.io Lookup](https://misp.github.io/misp-modules/expansion/#ipinfo.io-lookup) - An expansion module to query ipinfo.io to gather more information on a given IP address.
 * [IPQualityScore Lookup](https://misp.github.io/misp-modules/expansion/#ipqualityscore-lookup) - IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone Number Validation, Malicious Domain and Malicious URL Scanner.
 * [IPRep Lookup](https://misp.github.io/misp-modules/expansion/#iprep-lookup) - Module to query IPRep data for IP addresses.
+* [isMalicious Lookup](https://misp.github.io/misp-modules/expansion/#ismalicious-lookup) - Query isMalicious for IP, domain, hostname, and URL reputation.
 * [Ninja Template Rendering](https://misp.github.io/misp-modules/expansion/#ninja-template-rendering) - Render the template with the data passed
 * [Joe Sandbox Import](https://misp.github.io/misp-modules/expansion/#joe-sandbox-import) - Query Joe Sandbox API with a submission url to get the json report and extract its data that is parsed and converted into MISP attributes and objects.
 * [Joe Sandbox Submit](https://misp.github.io/misp-modules/expansion/#joe-sandbox-submit) - A module to submit files or URLs to Joe Sandbox for an advanced analysis, and return the link of the submission.
@@ -91,7 +93,16 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [RandomcoinDB Lookup](https://misp.github.io/misp-modules/expansion/#randomcoindb-lookup) - Module to access the ransomcoinDB (see https://ransomcoindb.concinnity-risks.com)
 * [r7_akb](https://misp.github.io/misp-modules/expansion/#r7_akb) - Enrich CVEs via AttackerKB and return structured MISP events. Handles rate limits, regex CVE detection, and markdown cleanup.
 * [Real-time Blackhost Lists Lookup](https://misp.github.io/misp-modules/expansion/#real-time-blackhost-lists-lookup) - Module to check an IPv4 address against known RBLs.
+* [RST Cloud Cobalt Strike Beacon](https://misp.github.io/misp-modules/expansion/#rst-cloud-cobalt-strike-beacon) - Scan a target for Cobalt Strike beacon configurations via RST Scan API.
+* [RST Cloud Favicon](https://misp.github.io/misp-modules/expansion/#rst-cloud-favicon) - Fetch favicon image and hashes for Shodan/Netlas/Censys/FOFA pivoting via RST Scan API.
+* [RST Cloud HTML Fetcher](https://misp.github.io/misp-modules/expansion/#rst-cloud-html-fetcher) - Fetch rendered HTML body or extracted JavaScript via RST Scan API.
+* [RST Cloud IoC Lookup](https://misp.github.io/misp-modules/expansion/#rst-cloud-ioc-lookup) - Enrich indicators with RST Cloud threat intelligence.
+* [RST Cloud Noise Control](https://misp.github.io/misp-modules/expansion/#rst-cloud-noise-control) - Check whether an indicator is known-good or noisy via RST Noise Control.
+* [RST Cloud Screenshot](https://misp.github.io/misp-modules/expansion/#rst-cloud-screenshot) - Capture a page screenshot via RST Scan API.
+* [RST Cloud SSL Certificate](https://misp.github.io/misp-modules/expansion/#rst-cloud-ssl-certificate) - Fetch TLS certificate as an x509 MISP object via RST Scan API.
+* [RST Cloud Whois](https://misp.github.io/misp-modules/expansion/#rst-cloud-whois) - Retrieve parsed WHOIS for a domain via RST Cloud.
 * [Recorded Future Enrich](https://misp.github.io/misp-modules/expansion/#recorded-future-enrich) - Module to enrich attributes with threat intelligence from Recorded Future.
+* [ReversingLabs Enrichment](https://misp.github.io/misp-modules/expansion/#reversinglabs-enrichment) - Module to enrich file hashes, domains, IPs and URLs with ReversingLabs Spectra Analyze threat intelligence.
 * [Reverse DNS](https://misp.github.io/misp-modules/expansion/#reverse-dns) - Simple Reverse DNS expansion service to resolve reverse DNS from MISP attributes.
 * [SecurityTrails Lookup](https://misp.github.io/misp-modules/expansion/#securitytrails-lookup) - An expansion modules for SecurityTrails.
 * [Shodan Lookup](https://misp.github.io/misp-modules/expansion/#shodan-lookup) - Module to query on Shodan.
@@ -110,6 +121,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [TruSTAR Enrich](https://misp.github.io/misp-modules/expansion/#trustar-enrich) - Module to get enrich indicators with TruSTAR.
 * [URLhaus Lookup](https://misp.github.io/misp-modules/expansion/#urlhaus-lookup) - Query of the URLhaus API to get additional information about the input attribute.
 * [URLScan Lookup](https://misp.github.io/misp-modules/expansion/#urlscan-lookup) - An expansion module to query urlscan.io.
+* [Validin Lookup](https://misp.github.io/misp-modules/expansion/#validin-lookup) - An expansion module to query Validin's historic internet intelligence database.
 * [VARIoT db Lookup](https://misp.github.io/misp-modules/expansion/#variot-db-lookup) - An expansion module to query the VARIoT db API for more information about a vulnerability.
 * [VirusTotal v3 Lookup](https://misp.github.io/misp-modules/expansion/#virustotal-v3-lookup) - Enrich observables with the VirusTotal v3 API
 * [VirusTotal Public API Lookup](https://misp.github.io/misp-modules/expansion/#virustotal-public-api-lookup) - Enrich observables with the VirusTotal v3 public API
@@ -121,7 +133,7 @@ For more information: [Extending MISP with Python modules](https://www.misp-proj
 * [Vulners Lookup](https://misp.github.io/misp-modules/expansion/#vulners-lookup) - An expansion hover module to expand information about CVE id using Vulners API.
 * [Vysion Enrich](https://misp.github.io/misp-modules/expansion/#vysion-enrich) - Module to enrich the information by making use of the Vysion API.
 * [Whois Lookup](https://misp.github.io/misp-modules/expansion/#whois-lookup) - Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
-* [WhoisFreaks Lookup](https://misp.github.io/misp-modules/expansion/#whoisfreaks-lookup) - An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
+* [WhoisFreaks Lookup](https://misp.github.io/misp-modules/expansion/#whoisfreaks-lookup) - An expansion module for https://whoisfreaks.com/ that enriches a domain or an IP address. For a domain it queries the WHOIS, DNS and Domain Reputation APIs; for an IP address it queries the IP WHOIS, Geolocation and IP Security APIs. All lookups for a given attribute are executed in parallel.
 * [Wikidata Lookup](https://misp.github.io/misp-modules/expansion/#wikidata-lookup) - An expansion hover module to extract information from Wikidata to have additional information about particular term for analysis.
 * [IBM X-Force Exchange Lookup](https://misp.github.io/misp-modules/expansion/#ibm-x-force-exchange-lookup) - An expansion module for IBM X-Force Exchange.
 * [XLXS Enrich](https://misp.github.io/misp-modules/expansion/#xlxs-enrich) - Module to extract freetext from a .xlsx document.

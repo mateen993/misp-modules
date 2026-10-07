@@ -126,6 +126,68 @@ Module to query APIVoid with some domain attributes.
 
 -----
 
+#### [APIFreaks Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apifreaks.py)
+
+<img src=logos/apifreaks.png height=60>
+
+An expansion module for [APIFreaks](https://apifreaks.com/) that provides an
+enriched analysis of a domain, hostname, IP address, ASN or email address,
+including WHOIS, DNS, subdomains and domain-availability information.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/apifreaks.py)]
+
+- **features**:
+
+> The module takes a domain, hostname, IP address, ASN or email attribute as
+> input and queries the relevant APIFreaks WHOIS, Domain and DNS endpoints with
+> it. The results of the queries are then parsed to extract as much information
+> as possible and mapped into compatible MISP attributes. Each lookup family can
+> be toggled on or off from the module configuration to control API credit
+> usage.
+
+- **config**:
+
+> - apikey
+> - do_whois
+> - do_dns
+> - do_subdomains
+> - do_availability
+> - do_history
+> - do_reverse_dns
+
+- **input**:
+
+> A domain, hostname, IP address (ip-src/ip-dst), ASN (AS) or email
+> (email-src/email-dst/target-email/whois-registrant-email) attribute.
+
+- **output**:
+
+> MISP attributes resulting from the queries on the APIFreaks API, included in
+> the following list:
+> - domain
+> - hostname
+> - ip-src
+> - ip-dst
+> - AS
+> - whois-registrant-email
+> - whois-registrant-phone
+> - whois-registrant-name
+> - whois-registrar
+> - whois-creation-date
+> - dns-soa-email
+> - email-src
+> - datetime
+> - text
+
+- **references**:
+
+> - <https://apifreaks.com/>
+> - <https://apifreaks.com/api>
+
+- **requirements**:
+
+> An access to the APIFreaks API (apikey)
+---
+
 #### [AssemblyLine Query](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/assemblyline_query.py)
 
 <img src=logos/assemblyline.png height=60>
@@ -1347,15 +1409,16 @@ IPQualityScore MISP Expansion Module for IP reputation, Email Validation, Phone 
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ipqs_fraud_and_risk_scoring.py)]
 
 - **features**:
->This Module takes the IP Address, Domain, URL, Email and Phone Number MISP Attributes as input to query the IPQualityScore API.
+> This Module takes the IP Address, Domain, URL, Email, Phone Number, Username MISP Attributes as input to query the IPQualityScore API.
 > The results of the IPQualityScore API are than returned as IPQS Fraud and Risk Scoring Object. 
 > The object contains a copy of the enriched attribute with added tags presenting the verdict based on fraud score,risk score and other attributes from IPQualityScore.
+> This module takes an attachment or malware-sample attribute as input to query the IPQS Malware Scanner API.
 
 - **config**:
 >apikey
 
 - **input**:
->A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email) and Phone Number(phone-number, whois-registrant-phone).
+>A MISP attribute of type IP Address(ip-src, ip-dst), Domain(hostname, domain), URL(url, uri), Email Address(email, email-src, email-dst, target-email, whois-registrant-email), Phone Number(phone-number, whois-registrant-phone), File(attachment, malware-sample), Username(first-name, last-name, middle-name,github-username) and Password(text).
 
 - **output**:
 >IPQualityScore object, resulting from the query on the IPQualityScore API.
@@ -1390,6 +1453,35 @@ Module to query IPRep data for IP addresses.
 
 - **requirements**:
 >An access to the packetmail API (apikey)
+
+-----
+
+#### [isMalicious Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ismalicious.py)
+
+<img src=logos/ismalicious.png height=60>
+
+Query isMalicious for IP, domain, hostname, and URL reputation.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/ismalicious.py)]
+
+- **features**:
+>The module takes an IP, domain, hostname or URL attribute (the domain side of a domain|ip) and queries GET /check on the isMalicious API. It returns a text summary with the malicious flag, risk score, categories and source count. Only threat listings are counted: listings that describe what an indicator is (cloud and CDN ranges, Tor exits, DoH resolvers, ad lists, allowlists) are left out of the categories and of the source count. Hover and expansion share the same handler. The queried indicator is sent over TLS; nothing else leaves the MISP instance besides the configured API key.
+
+- **config**:
+> - api_key
+> - api_url
+
+- **input**:
+>An IP address, domain, hostname or URL.
+
+- **output**:
+>Text attributes with the isMalicious reputation summary.
+
+- **references**:
+> - https://ismalicious.com/integrations/misp
+> - https://ismalicious.com/api-docs
+
+- **requirements**:
+>An isMalicious API key (free accounts are available): the X-API-KEY value, Base64 of apiKey:apiSecret, shown under API credentials on the isMalicious account page.
 
 -----
 
@@ -2590,6 +2682,30 @@ Module to get enrich indicators with TruSTAR.
 
 -----
 
+#### [TweetFeed Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/tweetfeed.py)
+
+Look up an IOC in TweetFeed (tweetfeed.live), the free CC0 feed of URLs, domains, IPs and hashes shared by the infosec community on X/Twitter: who reported it and when, the source tweets and hashtags, cross-feed corroboration, AI-generated context and campaign membership.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/tweetfeed.py)]
+
+- **features**:
+>The module takes an IP, domain, hostname, URL, MD5 or SHA-256 attribute and queries the TweetFeed API for it. Matches come back as microblog objects for the source tweets (reporter, hashtags, first/last seen), plus attributes for co-reported IOCs, AI-generated context, domain registration and hosting, IP network metadata, corroboration from other feeds and campaign membership. Everything returned is community reported and unverified: no MISP tag or confidence score is set from it. The live 365-day window is queried first, and IOCs older than that are looked up in TweetFeed's separate archive.
+
+- **input**:
+>An IP address, domain, hostname, URL, MD5 or SHA-256 attribute.
+
+- **output**:
+>microblog objects for the source tweets, domain-ip / text / link attributes with registration, network, corroboration, AI context and campaign data.
+
+- **references**:
+> - https://tweetfeed.live
+> - https://tweetfeed.live/api/
+> - https://tweetfeed.live/hunt/
+
+- **requirements**:
+>No API key required.
+
+-----
+
 #### [URLhaus Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/urlhaus.py)
 
 <img src=logos/urlhaus.png height=60>
@@ -2964,6 +3080,36 @@ Module to enrich the information by making use of the Vysion API.
 
 -----
 
+#### [Whisper](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whisper.py)
+
+<img src=logos/whisper.png height=60>
+
+Enrich IPs, domains, and ASNs with threat intelligence and infrastructure context from the Whisper graph.
+[[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whisper.py)]
+
+- **features**:
+>The module queries the Whisper graph for the input attribute and returns related infrastructure (DNS, ASN/BGP, WHOIS) and threat intelligence context as MISP attributes and objects.
+
+- **config**:
+> - api_url
+> - api_key
+> - max_tlp
+> - timeout
+
+- **input**:
+>An IP address, domain, hostname or AS MISP attribute.
+
+- **output**:
+>MISP attributes and objects with the related infrastructure and threat intelligence context from the Whisper graph.
+
+- **references**:
+>https://whisper.security
+
+- **requirements**:
+>An access to the Whisper graph API (api_url + api_key)
+
+-----
+
 #### [Whois Lookup](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whois.py)
 
 Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
@@ -2994,32 +3140,24 @@ Module to query a local instance of uwhois (https://github.com/rafiot/uwhoisd).
 
 <img src=logos/whoisfreaks.png height=60>
 
-An expansion module for https://whoisfreaks.com/ that will provide an enriched analysis of the provided domain, including WHOIS and DNS information.
+An expansion module for https://whoisfreaks.com/ that enriches a domain or an IP address. For a domain it queries the WHOIS, DNS and Domain Reputation APIs; for an IP address it queries the IP WHOIS, Geolocation and IP Security APIs. All lookups for a given attribute are executed in parallel.
 [[source code](https://github.com/MISP/misp-modules/tree/main/misp_modules/modules/expansion/whoisfreaks.py)]
 
 - **features**:
->The module takes a domain as input and queries the Whoisfreaks API with it.
+>The module takes a domain or an IP address as input.
 >
->Some parsing operations are then processed on the result of the query to extract as much information as possible.
+>For a domain it queries the Whoisfreaks WHOIS (v1.0), DNS (v2.0) and Domain Reputation APIs in parallel. For an IP address it queries the IP WHOIS, Geolocation and IP Security APIs in parallel.
 >
->After this we map the extracted data to MISP attributes.
+>The results are mapped to MISP attributes, objects (geolocation, asn, reputation and security) and tags.
 
 - **config**:
 >apikey
 
 - **input**:
->A domain whose Data is required
+>A domain or an IP address (ip-src, ip-dst or ip).
 
 - **output**:
->MISP attributes resulting from the query on Whoisfreaks API, included in the following list:
->- domain
->- dns-soa-email
->- whois-registrant-email
->- whois-registrant-phone
->- whois-registrant-name
->- whois-registrar
->- whois-creation-date
->- domain
+>MISP attributes, objects and tags resulting from the WhoisFreaks WHOIS, DNS, Domain Reputation, IP WHOIS, Geolocation and IP Security APIs.
 
 - **references**:
 >https://whoisfreaks.com/

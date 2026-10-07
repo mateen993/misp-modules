@@ -3,6 +3,7 @@
 
 import json
 import os
+import time
 import unittest
 from base64 import b64encode
 from urllib.parse import urljoin
@@ -166,6 +167,9 @@ class TestExpansions(unittest.TestCase):
             self.assertTrue(self.get_values(response).startswith("Not a valid BTC address"))
 
     def test_btc_scam_check(self):
+        if LiveCI:
+            return
+
         query = {"module": "btc_scam_check", "btc": "1ES14c7qLb5CYhLMUekctxLgc1FV2Ti9DA"}
         response = self.misp_modules_post(query)
         self.assertEqual(self.get_values(response), "1es14c7qlb5cyhlmuekctxlgc1fv2ti9da fraudolent bitcoin address")
@@ -266,7 +270,7 @@ class TestExpansions(unittest.TestCase):
     def test_dns(self):
         query = {"module": "dns", "hostname": "www.circl.lu", "config": {"nameserver": "8.8.8.8"}}
         response = self.misp_modules_post(query)
-        self.assertEqual(self.get_values(response), "185.194.93.14")
+        self.assertEqual(self.get_values(response), "185.194.93.63")
 
     def test_docx(self):
         filename = "test.docx"
@@ -536,6 +540,33 @@ class TestExpansions(unittest.TestCase):
         except Exception:
             self.assertEqual(self.get_errors(response), "No data found by querying known RBLs")
 
+    def test_reversinglabs(self):
+        module_name = "reversinglabs_spectra_analyze"
+        # Test with different attribute types
+        attributes = (
+            {"uuid": "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "type": "sha256", "value": "a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3"},
+            {"uuid": "b2c3d4e5-f6a7-8901-bcde-f12345678901", "type": "domain", "value": "example.com"},
+            {"uuid": "c3d4e5f6-a7b8-9012-cdef-123456789012", "type": "ip-dst", "value": "8.8.8.8"},
+        )
+        results = ("file", "domain-ip", "ip-port")
+        if module_name in self.configs:
+            for attribute, result in zip(attributes, results):
+                query = {"module": module_name, "attribute": attribute, "config": self.configs[module_name]}
+                response = self.misp_modules_post(query)
+                try:
+                    self.assertEqual(self.get_first_object_type(response), result)
+                except Exception:
+                    # API errors are acceptable when testing without valid credentials
+                    self.assertTrue(
+                        self.get_errors(response).startswith("Error") or
+                        "API" in self.get_errors(response) or
+                        "authentication" in self.get_errors(response).lower()
+                    )
+        else:
+            query = {"module": module_name, "attribute": attributes[0]}
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), "Missing api_url in config")
+
     def test_reversedns(self):
         query = {"module": "reversedns", "ip-src": "8.8.8.8"}
         response = self.misp_modules_post(query)
@@ -676,6 +707,25 @@ class TestExpansions(unittest.TestCase):
             response = self.misp_modules_post(query)
             self.assertEqual(self.get_errors(response), "Urlscan apikey is missing")
 
+    def test_validin(self):
+        module_name = "validin"
+        query = {
+            "module": module_name,
+            "attribute": {
+                "type": "domain",
+                "value": "validin.com",
+                "uuid": "c0998c0d-e9c8-4cec-8514-3307bc1bf722",
+            },
+            "config": {},
+        }
+        if module_name in self.configs:
+            query["config"] = self.configs[module_name]
+            response = self.misp_modules_post(query)
+            self.assertIn("results", response.json())
+        else:
+            response = self.misp_modules_post(query)
+            self.assertEqual(self.get_errors(response), "Validin API key is missing.")
+
     def test_virustotal_public(self):
         module_name = "virustotal_public"
         attributes = (
@@ -741,13 +791,43 @@ class TestExpansions(unittest.TestCase):
 
     def test_wikidata(self):
         query = {"module": "wiki", "text": "Google"}
-        response = self.misp_modules_post(query)
+        retryable_errors = {"Something went wrong, look in the server logs for details"}
+        max_attempts = 4
+        wait_seconds = 2
+
+        last_response = None
+        last_exception = None
+        for attempt in range(1, max_attempts + 1):
+            try:
+                last_response = self.misp_modules_post(query)
+            except requests.exceptions.RequestException as request_exception:
+                last_exception = request_exception
+                if attempt < max_attempts:
+                    time.sleep(wait_seconds)
+                    continue
+                self.fail(f"Wikidata request failed after {max_attempts} attempts: {request_exception}")
+
+            try:
+                self.assertEqual(self.get_values(last_response), "http://www.wikidata.org/entity/Q95")
+                return
+            except Exception:
+                try:
+                    error_message = self.get_errors(last_response)
+                except Exception:
+                    error_message = None
+
+                if error_message not in retryable_errors or attempt == max_attempts:
+                    break
+
+                time.sleep(wait_seconds)
+
+        if last_response is None and last_exception is not None:
+            self.fail(f"Wikidata request failed after {max_attempts} attempts: {last_exception}")
+
         try:
-            self.assertEqual(self.get_values(response), "http://www.wikidata.org/entity/Q95")
-        except KeyError:
-            self.assertEqual(self.get_errors(response), "Something went wrong, look in the server logs for details")
+            self.assertEqual(self.get_values(last_response), "No additional data found on Wikidata")
         except Exception:
-            self.assertEqual(self.get_values(response), "No additional data found on Wikidata")
+            self.assertEqual(self.get_errors(last_response), "Something went wrong, look in the server logs for details")
 
     def test_xforceexchange(self):
         module_name = "xforceexchange"

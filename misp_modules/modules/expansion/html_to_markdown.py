@@ -1,6 +1,9 @@
 import json
+import socket
 
 import requests
+import ipaddress
+from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 from markdownify import markdownify
 
@@ -24,9 +27,82 @@ moduleinfo = {
 }
 
 
+BLOCKED_RANGES = [
+    ipaddress.ip_network("127.0.0.0/8"),
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.168.0.0/16"),
+    ipaddress.ip_network("169.254.0.0/16"),
+    ipaddress.ip_network("::1/128"),
+]
+MAX_REDIRECTS = 10
+
+
+def _normalize_ip_address(ip_str: str) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
+    ip = ipaddress.ip_address(ip_str)
+    return getattr(ip, "ipv4_mapped", None) or ip
+
+
+def _is_ip_blocked(ip_str: str) -> bool:
+    ip = _normalize_ip_address(ip_str)
+    return any(ip in net for net in BLOCKED_RANGES)
+
+
+def _hostname_resolves_to_blocked_ip(hostname: str) -> bool:
+    try:
+        resolved = socket.getaddrinfo(hostname, None)
+        return any(_is_ip_blocked(info[4][0]) for info in resolved)
+    except socket.gaierror:
+        return True
+
+
+def _canonicalize_url(url: str) -> str | None:
+    """Return the URL exactly as requests will send it, rejecting ambiguous input."""
+    if not isinstance(url, str) or "\\" in url:
+        return None
+    try:
+        return requests.Request("GET", url).prepare().url
+    except requests.RequestException:
+        return None
+
+
+def _is_safe_canonical_url(url: str) -> bool:
+    try:
+        parsed = urlparse(url)
+        hostname = parsed.hostname
+    except ValueError:
+        return False
+    if parsed.scheme not in ("http", "https") or not hostname:
+        return False
+    try:
+        return not _is_ip_blocked(hostname)
+    except ValueError:
+        return not _hostname_resolves_to_blocked_ip(hostname)
+
+
+def is_safe_url(url: str) -> bool:
+    canonical_url = _canonicalize_url(url)
+    return canonical_url is not None and _is_safe_canonical_url(canonical_url)
+
+
 def fetchHTML(url):
-    r = requests.get(url)
-    return r.text
+    canonical_url = _canonicalize_url(url)
+    if canonical_url is None or not _is_safe_canonical_url(canonical_url):
+        raise ValueError(f"Blocked URL: {url}")
+
+    with requests.Session() as session:
+        for _ in range(MAX_REDIRECTS + 1):
+            response = session.get(canonical_url, timeout=10, allow_redirects=False)
+            if not response.is_redirect:
+                return response.text
+
+            redirected_url = _canonicalize_url(urljoin(canonical_url, response.headers["location"]))
+            response.close()
+            if redirected_url is None or not _is_safe_canonical_url(redirected_url):
+                raise ValueError(f"Blocked redirect URL: {redirected_url}")
+            canonical_url = redirected_url
+
+    raise ValueError(f"Too many redirects for URL: {url}")
 
 
 def stripUselessTags(html):
@@ -46,11 +122,13 @@ def handler(q=False):
     if q is False:
         return False
     request = json.loads(q)
-    if request.get("url"):
-        url = request["url"]
+    if request.get('raw_html'):
+        html = request.get('raw_html')
+    elif request.get('url'):
+        url = request['url']
+        html = fetchHTML(url)
     else:
         return False
-    html = fetchHTML(url)
     html = stripUselessTags(html)
     markdown = convertHTML(html)
 
